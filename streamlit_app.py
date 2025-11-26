@@ -136,8 +136,7 @@ elif page == "Map / Hotspots":
     )
 
     tooltip = {
-        "html": "<b>Crime:</b> {primary_type}<br><b>Date:</b> {date}<br><b>Cluster:</b> {"
-                + cluster_col + "}",
+        "html": "<b>Crime:</b> {primary_type}<br><b>Date:</b> {date}<br><b>Cluster:</b> {" + cluster_col + "}",
         "style": {"backgroundColor": NAVY, "color": "white"}
     }
 
@@ -190,27 +189,59 @@ elif page == "Cluster Comparison":
 
 
 ##############################################
-# PAGE 5 — PCA & UMAP
+# PAGE 5 — PCA & UMAP (FULL PATCH: ShapeError FIXED)
 ##############################################
 elif page == "PCA & UMAP":
     st.markdown(f"<h2 style='color:{NAVY};'>PCA & UMAP</h2>", unsafe_allow_html=True)
     df = load_parquet_drive(URL_EMBEDDINGS)
 
+    # -------------------------------
+    # PATCHED PCA SCATTER (no series misalignment)
+    # -------------------------------
+    st.subheader("PCA Scatter")
     if "pca1" in df.columns and "pca2" in df.columns:
-        st.subheader("PCA Scatter")
-        fig = px.scatter(df.sample(20000),
-                         x="pca1", y="pca2",
-                         color=df[cluster_col].astype(str)
-                         if cluster_col in df.columns else None)
-        st.plotly_chart(fig, use_container_width=True)
+        sdf = df.sample(min(20000, len(df))).copy()
 
-    if "umap1" in df.columns and "umap2" in df.columns:
-        st.subheader("UMAP Scatter")
-        fig = px.scatter(df.sample(20000),
-                         x="umap1", y="umap2",
-                         color=df[cluster_col].astype(str)
-                         if cluster_col in df.columns else None)
+        if cluster_col in sdf.columns:
+            sdf["cluster_color"] = sdf[cluster_col].astype(str)
+        else:
+            sdf["cluster_color"] = "unknown"
+
+        fig = px.scatter(
+            sdf,
+            x="pca1",
+            y="pca2",
+            color="cluster_color",
+            title="PCA Scatter (sampled)",
+            color_discrete_sequence=px.colors.sequential.Blues
+        )
         st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("PCA columns not available.")
+
+    # -------------------------------
+    # PATCHED UMAP SCATTER
+    # -------------------------------
+    st.subheader("UMAP Scatter")
+    if "umap1" in df.columns and "umap2" in df.columns:
+        sdf = df.sample(min(20000, len(df))).copy()
+
+        if cluster_col in sdf.columns:
+            sdf["cluster_color"] = sdf[cluster_col].astype(str)
+        else:
+            sdf["cluster_color"] = "unknown"
+
+        fig = px.scatter(
+            sdf,
+            x="umap1",
+            y="umap2",
+            color="cluster_color",
+            title="UMAP Scatter (sampled)",
+            color_discrete_sequence=px.colors.sequential.Blues
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("UMAP columns not available.")
 
 
 ##############################################
@@ -257,5 +288,4 @@ elif page == "Patrol Recommendations":
 
     st.subheader("Top Clusters")
     st.dataframe(summary.head(10))
-
 
