@@ -1,9 +1,3 @@
-##############################################
-# PatrolIQ — Streamlit Cloud Version (Option B)
-# Loads data from Google Drive ON DEMAND
-# Same UI & Pages as local version, cloud-optimized
-##############################################
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -288,4 +282,5 @@ elif page == "Patrol Recommendations":
 
     st.subheader("Top Clusters")
     st.dataframe(summary.head(10))
+
 
