@@ -37,3 +37,6 @@ python run_all.py
 
 ## Author
 PatrolIQ Crime Analytics System
+
+
+View Demo - https://patroliq-smart-safety-analytics-platform-ww4voxbkman3s3fmshmrc.streamlit.app/
